@@ -27,6 +27,7 @@ const CheckPermissionModal: React.FC<CheckPermissionModalProps> = ({ onClose }) 
       setErrorMessage(
         "Permissions denied. Please enable camera, microphone, and screen sharing permissions to proceed."
       );
+      console.log(error)
     } finally {
       setIsChecking(false); 
     }

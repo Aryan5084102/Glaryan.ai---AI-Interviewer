@@ -22,6 +22,7 @@ const QuestionScreen: React.FC = () => {
   const [showCompletionModal, setShowCompletionModal] = useState(false);
 
   const mediaStreamRef = useRef<MediaStream | null>(null); 
+  console.log(recordedChunks)
 
   useEffect(() => {
     if (audioRef.current) {

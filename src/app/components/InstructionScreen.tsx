@@ -1,11 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import { useRouter } from "next/navigation";
 import CheckPermissionModal from "./CheckPermissionScreen";
 
 const InstructionScreen: React.FC = () => {
-  const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleNext = () => {

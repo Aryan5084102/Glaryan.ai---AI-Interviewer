@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
 const AnswerRecordingScreen = () => {
   const [isRecording, setIsRecording] = useState(false);
@@ -15,6 +15,7 @@ const AnswerRecordingScreen = () => {
     };
     recorder.onstop = () => {
       const blob = new Blob(recordedChunks, { type: 'video/webm' });
+      console.log(blob)
     };
     recorder.start();
     setMediaRecorder(recorder);
