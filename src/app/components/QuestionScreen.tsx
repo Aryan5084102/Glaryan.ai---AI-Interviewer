@@ -36,7 +36,7 @@ const QuestionScreen: React.FC = () => {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
           video: true,
-          audio: true,
+          audio: false,
         });
         mediaStreamRef.current = stream; 
 
