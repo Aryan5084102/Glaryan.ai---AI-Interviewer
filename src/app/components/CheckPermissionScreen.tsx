@@ -40,7 +40,7 @@ const CheckPermissionModal: React.FC<CheckPermissionModalProps> = ({ onClose }) 
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-gray-800 text-white rounded-lg p-10 w-full max-w-md shadow-lg transform transition-transform scale-100 animate-fade-in">
         <div className="flex flex-col justify-center items-center">
-          <BsExclamationCircle size={40} className="text-red-500 mb-4" />
+          <BsExclamationCircle size={40} className="text-red-500 mb-4"  />
           <h1 className="text-2xl font-bold mb-4">Permission Check</h1>
           <p className="mb-4 text-center">
             We need access to your camera, microphone, and screen to proceed.
