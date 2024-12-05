@@ -1,8 +1,8 @@
-
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from 'next/image'
 
 const QuestionScreen: React.FC = () => {
   const router = useRouter();
@@ -20,48 +20,68 @@ const QuestionScreen: React.FC = () => {
   const [isAnswering, setIsAnswering] = useState(false);
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
   const [recordedChunks, setRecordedChunks] = useState<Blob[]>([]);
+  const [showCompletionModal, setShowCompletionModal] = useState(false);
+
+  const mediaStreamRef = useRef<MediaStream | null>(null); // Store media stream reference
 
   useEffect(() => {
-    // Play the question audio when it changes
+    // Automatically play the question audio when the question changes
     if (audioRef.current) {
       audioRef.current.src = questions[currentQuestionIndex].audio;
       audioRef.current.play();
     }
   }, [currentQuestionIndex]);
 
-  const startRecording = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: true,
-        audio: true,
-      });
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        videoRef.current.play();
-      }
+  useEffect(() => {
+    // Start the video feed when the component mounts
+    const initializeMedia = async () => {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: true,
+        });
+        mediaStreamRef.current = stream; // Store the media stream
 
-      const recorder = new MediaRecorder(stream);
-      recorder.ondataavailable = (event) => {
-        if (event.data.size > 0) {
-          setRecordedChunks((prev) => [...prev, event.data]);
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          videoRef.current.play();
         }
-      };
 
-      recorder.start();
-      setMediaRecorder(recorder);
-      setIsAnswering(true); // Show video recording UI
-    } catch (error) {
-      console.error("Error accessing media devices:", error);
-      alert("Unable to access your camera and microphone.");
+        const recorder = new MediaRecorder(stream);
+        recorder.ondataavailable = (event) => {
+          if (event.data.size > 0) {
+            setRecordedChunks((prev) => [...prev, event.data]);
+          }
+        };
+
+        setMediaRecorder(recorder);
+      } catch (error) {
+        console.error("Error accessing media devices:", error);
+        alert("Unable to access your camera and microphone.");
+      }
+    };
+
+    initializeMedia();
+
+    // Cleanup: stop the media stream when the component unmounts
+    return () => {
+      if (mediaStreamRef.current) {
+        const tracks = mediaStreamRef.current.getTracks();
+        tracks.forEach((track) => track.stop());
+      }
+    };
+  }, []);
+
+  const startRecording = () => {
+    if (mediaRecorder) {
+      mediaRecorder.start();
+      setIsAnswering(true);
     }
   };
 
   const stopRecording = () => {
-    mediaRecorder?.stop();
-    if (videoRef.current?.srcObject) {
-      const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
-      tracks.forEach((track) => track.stop());
-      videoRef.current.srcObject = null;
+    if (mediaRecorder) {
+      mediaRecorder.stop();
     }
     setIsAnswering(false);
   };
@@ -70,28 +90,43 @@ const QuestionScreen: React.FC = () => {
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
       setRecordedChunks([]); // Clear previous recordings
-    } else {
-      router.push("/completion"); // Navigate to completion screen after the last question
+      setIsAnswering(false); // Reset answering state for the next question
     }
   };
 
   const handleFinishAnswer = () => {
     stopRecording(); // Stop the recording
-    handleNextQuestion(); // Move to the next question
+    if (currentQuestionIndex < questions.length - 1) {
+      handleNextQuestion(); // Move to the next question
+    }
+  };
+
+  const handleSubmit = () => {
+    stopRecording(); // Ensure recording stops before submission
+
+    if (mediaStreamRef.current) {
+      const tracks = mediaStreamRef.current.getTracks();
+      tracks.forEach((track) => track.stop());
+    }
+    setShowCompletionModal(true); // Show the completion modal
+  };
+
+  const handleClose = () => {
+    router.push("/");
   };
 
   return (
-    <div className="h-screen flex flex-col md:flex-row px-6 md:px-16 lg:px-32 bg-dark-bg">
-      {/* Left Section: Question and Audio */}
+    <div className="h-screen flex flex-row  px-6 md:px-16 lg:px-32 bg-dark-bg">
+      {/* Left Section: Question Display */}
       <div className="flex-1 flex flex-col justify-center items-center">
-        <h1 className="text-3xl font-bold mb-8">Question</h1>
-        <p className="mb-4 text-lg text-center">{questions[currentQuestionIndex].text}</p>
-
-        {/* Audio player */}
-        <audio ref={audioRef} controls className="mb-6">
-          <source src={questions[currentQuestionIndex].audio} type="audio/mpeg" />
-          Your browser does not support the audio element.
-        </audio>
+        <h1 className="text-3xl font-bold mb-10">
+          Question ({currentQuestionIndex + 1}/{questions.length})
+        </h1>
+        <div className="mb-6 text-lg ">
+          <p className="p-4 text-white ">
+            {questions[currentQuestionIndex].text}
+          </p>
+        </div>
 
         {/* Buttons */}
         {!isAnswering ? (
@@ -102,20 +137,45 @@ const QuestionScreen: React.FC = () => {
             Start Answering
           </button>
         ) : (
-          <button
-            onClick={handleFinishAnswer}
-            className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition mt-4"
-          >
-            Finish Answer
-          </button>
+          <div className="flex space-x-4 mt-4">
+            <button
+              onClick={handleFinishAnswer}
+              className="bg-purple-500 text-white py-2 px-4 rounded hover:bg-purple-600 transition"
+            >
+              {currentQuestionIndex === questions.length - 1 ? "Finish Answer" : "Next Question"}
+            </button>
+            {currentQuestionIndex === questions.length - 1 && (
+              <button
+                onClick={handleSubmit}
+                className="bg-red-500 text-white py-2 px-6 rounded hover:bg-red-600 transition"
+              >
+                Submit
+              </button>
+            )}
+          </div>
         )}
       </div>
 
       {/* Right Section: Video Recording */}
-      {isAnswering && (
-        <div className="flex-1 flex flex-col items-center justify-center">
-          <h2 className="text-xl font-bold mb-4">Recording...</h2>
-          <video ref={videoRef} className="w-full max-w-md border border-gray-600 rounded-md" />
+      <div className="flex-1 flex flex-col items-center justify-center">
+        <h2 className="text-xl font-bold mb-4">{isAnswering ? "Recording Answer..." : "Live Preview"}</h2>
+        <video ref={videoRef} className="w-full max-w-md border border-gray-600 rounded-md" autoPlay />
+      </div>
+
+      {/* Completion Modal */}
+      {showCompletionModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="bg-gray-800 p-8 rounded-lg shadow-lg max-w-md w-full text-center">
+            <h1 className="text-2xl font-bold mb-4">Test Completed</h1>
+            <Image src="https://cdn.dribbble.com/users/28588/screenshots/3669080/media/f469f659f60053c25df8aeca3a7556f1.gif" width={20} height={20} alt="Error" />
+            <p className="text-lg mb-6">Thank you for completing the AI interview test.</p>
+            <button
+              onClick={handleClose}
+              className="bg-blue-500 text-white py-2 px-6 rounded hover:bg-blue-600"
+            >
+              Back to Home
+            </button>
+          </div>
         </div>
       )}
     </div>
