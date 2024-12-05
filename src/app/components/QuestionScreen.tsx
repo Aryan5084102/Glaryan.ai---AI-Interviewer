@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import Image from 'next/image'
+import { FaRegCheckCircle } from "react-icons/fa";
 
 const QuestionScreen: React.FC = () => {
   const router = useRouter();
@@ -165,9 +165,9 @@ const QuestionScreen: React.FC = () => {
       {/* Completion Modal */}
       {showCompletionModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-gray-800 p-8 rounded-lg shadow-lg max-w-md w-full text-center">
+          <div className="bg-gray-800 p-8 rounded-lg flex items-center justify-center flex-col shadow-lg ">
             <h1 className="text-2xl font-bold mb-4">Test Completed</h1>
-            <Image src="https://cdn.dribbble.com/users/28588/screenshots/3669080/media/f469f659f60053c25df8aeca3a7556f1.gif" width={20} height={20} alt="Error" />
+            <FaRegCheckCircle className="w-14 h-14 mb-4 text-green-500" />
             <p className="text-lg mb-6">Thank you for completing the AI interview test.</p>
             <button
               onClick={handleClose}
