@@ -6,7 +6,7 @@ import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import { useRouter } from "next/navigation";
 
 interface CheckPermissionModalProps {
-  onClose: () => void; // Callback to close the modal
+  onClose: () => void; 
 }
 
 const CheckPermissionModal: React.FC<CheckPermissionModalProps> = ({ onClose }) => {
@@ -16,26 +16,24 @@ const CheckPermissionModal: React.FC<CheckPermissionModalProps> = ({ onClose }) 
   const [errorMessage, setErrorMessage] = useState("");
 
   const checkPermissions = async () => {
-    setIsChecking(true); // Show spinner
-    setErrorMessage(""); // Clear previous errors
+    setIsChecking(true); 
+    setErrorMessage(""); 
     try {
-      // Request camera and microphone permissions
       await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-      // Request screen sharing permissions
       await navigator.mediaDevices.getDisplayMedia();
 
-      setPermissionGranted(true); // Grant permission
+      setPermissionGranted(true);
     } catch (error) {
       setErrorMessage(
         "Permissions denied. Please enable camera, microphone, and screen sharing permissions to proceed."
       );
     } finally {
-      setIsChecking(false); // Hide spinner
+      setIsChecking(false); 
     }
   };
 
   const navigateToQuestion = () => {
-    router.push("/question"); // Navigate to the question screen
+    router.push("/question"); 
   };
 
   return (
@@ -49,14 +47,12 @@ const CheckPermissionModal: React.FC<CheckPermissionModalProps> = ({ onClose }) 
           </p>
         </div>
 
-        {/* Error Message */}
         {errorMessage && (
           <div className="bg-red-500 text-white text-sm p-2 rounded mb-4">
             {errorMessage}
           </div>
         )}
 
-        {/* Spinner or Grant Permissions Button */}
         <div className="text-center">
           {isChecking ? (
             <AiOutlineLoading3Quarters className="w-7 h-7 text-green-500 animate-spin mx-auto mb-4" />
@@ -73,7 +69,6 @@ const CheckPermissionModal: React.FC<CheckPermissionModalProps> = ({ onClose }) 
           )}
         </div>
 
-        {/* Continue Button */}
         <div className="flex justify-center">
           {permissionGranted && (
             <button
@@ -85,10 +80,9 @@ const CheckPermissionModal: React.FC<CheckPermissionModalProps> = ({ onClose }) 
           )}
         </div>
 
-        {/* Close Button */}
         <button
           className="absolute top-3 right-3 text-white hover:text-gray-300 text-2xl"
-          onClick={onClose} // Close modal
+          onClick={onClose}
         >
           ✕
         </button>

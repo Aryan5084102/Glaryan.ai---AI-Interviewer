@@ -15,7 +15,6 @@ const AnswerRecordingScreen = () => {
     };
     recorder.onstop = () => {
       const blob = new Blob(recordedChunks, { type: 'video/webm' });
-      // send the blob to your API
     };
     recorder.start();
     setMediaRecorder(recorder);

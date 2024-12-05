@@ -9,7 +9,6 @@ const QuestionScreen: React.FC = () => {
   const audioRef = useRef<HTMLAudioElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  // Question data: array of questions with corresponding audio
   const questions = [
     { text: "What are your strengths and weaknesses?", audio: "/question1.mp3" },
     { text: "Describe a challenging project you've worked on.", audio: "/question2.mp3" },
@@ -22,10 +21,9 @@ const QuestionScreen: React.FC = () => {
   const [recordedChunks, setRecordedChunks] = useState<Blob[]>([]);
   const [showCompletionModal, setShowCompletionModal] = useState(false);
 
-  const mediaStreamRef = useRef<MediaStream | null>(null); // Store media stream reference
+  const mediaStreamRef = useRef<MediaStream | null>(null); 
 
   useEffect(() => {
-    // Automatically play the question audio when the question changes
     if (audioRef.current) {
       audioRef.current.src = questions[currentQuestionIndex].audio;
       audioRef.current.play();
@@ -33,14 +31,13 @@ const QuestionScreen: React.FC = () => {
   }, [currentQuestionIndex]);
 
   useEffect(() => {
-    // Start the video feed when the component mounts
     const initializeMedia = async () => {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
           video: true,
           audio: true,
         });
-        mediaStreamRef.current = stream; // Store the media stream
+        mediaStreamRef.current = stream; 
 
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
@@ -63,7 +60,6 @@ const QuestionScreen: React.FC = () => {
 
     initializeMedia();
 
-    // Cleanup: stop the media stream when the component unmounts
     return () => {
       if (mediaStreamRef.current) {
         const tracks = mediaStreamRef.current.getTracks();
@@ -89,26 +85,26 @@ const QuestionScreen: React.FC = () => {
   const handleNextQuestion = () => {
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
-      setRecordedChunks([]); // Clear previous recordings
-      setIsAnswering(false); // Reset answering state for the next question
+      setRecordedChunks([]); 
+      setIsAnswering(false); 
     }
   };
 
   const handleFinishAnswer = () => {
-    stopRecording(); // Stop the recording
+    stopRecording(); 
     if (currentQuestionIndex < questions.length - 1) {
-      handleNextQuestion(); // Move to the next question
+      handleNextQuestion();
     }
   };
 
   const handleSubmit = () => {
-    stopRecording(); // Ensure recording stops before submission
+    stopRecording(); 
 
     if (mediaStreamRef.current) {
       const tracks = mediaStreamRef.current.getTracks();
       tracks.forEach((track) => track.stop());
     }
-    setShowCompletionModal(true); // Show the completion modal
+    setShowCompletionModal(true); 
   };
 
   const handleClose = () => {
@@ -117,7 +113,6 @@ const QuestionScreen: React.FC = () => {
 
   return (
     <div className="h-screen flex flex-row  px-6 md:px-16 lg:px-32 bg-dark-bg">
-      {/* Left Section: Question Display */}
       <div className="flex-1 flex flex-col justify-center items-center">
         <h1 className="text-3xl font-bold mb-10">
           Question ({currentQuestionIndex + 1}/{questions.length})
@@ -128,7 +123,6 @@ const QuestionScreen: React.FC = () => {
           </p>
         </div>
 
-        {/* Buttons */}
         {!isAnswering ? (
           <button
             onClick={startRecording}
@@ -156,13 +150,11 @@ const QuestionScreen: React.FC = () => {
         )}
       </div>
 
-      {/* Right Section: Video Recording */}
       <div className="flex-1 flex flex-col items-center justify-center">
         <h2 className="text-xl font-bold mb-4">{isAnswering ? "Recording Answer..." : "Live Preview"}</h2>
         <video ref={videoRef} className="w-full max-w-md border border-gray-600 rounded-md" autoPlay />
       </div>
 
-      {/* Completion Modal */}
       {showCompletionModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
           <div className="bg-gray-800 p-8 rounded-lg flex items-center justify-center flex-col shadow-lg ">
